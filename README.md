@@ -1,8 +1,17 @@
-# Welcome to your Lovable project
+# Interview Copilot - Web Application
 
-## Project info
+A sophisticated web-based interview assistant that provides real-time AI-powered responses during job interviews. Built with React frontend, FastAPI backend, and Google Gemini AI integration.
 
-Interview Copilot
+## 🚀 Features
+
+- **Real-time Speech Recognition**: Uses Web Speech API for continuous transcription
+- **AI-Powered Responses**: Gemini 2.5 Pro generates contextual interview answers
+- **Stealth Interface**: Minimal, hideable UI with hotkey controls
+- **Session Management**: Persistent interview sessions with transcript history
+- **Cross-Platform**: Works on any modern web browser
+- **Responsive Design**: Optimized for desktop and mobile devices
+
+# How to use ?
 
 **Use your preferred IDE**
 
@@ -49,3 +58,30 @@ This project is built with:
 - React
 - shadcn-ui
 - Tailwind CSS
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Add tests if applicable
+5. Submit a pull request
+
+
+## 🙏 Acknowledgments
+
+- Google Gemini AI for intelligent response generation
+- Web Speech API for real-time transcription
+- FastAPI for robust backend framework
+- React for responsive frontend development
+
+## 📞 Support
+
+For issues and questions:
+1. Check the troubleshooting section
+2. Review the logs in browser console and backend
+3. Create an issue in the repository
+
+---
+
+**⚠️ Disclaimer**: This tool is for educational and personal use. Ensure compliance with your organization's interview policies before use in professional settings.
