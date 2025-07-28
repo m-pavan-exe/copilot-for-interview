@@ -12,7 +12,7 @@ export class GeminiService {
   }
 
   private createInterviewPrompt(question: string, context?: string): string {
-    return `You are an expert interview coach helping a candidate during a job interview. 
+    return `You are an expert interview coach with great knowledge on Computer science, AI, ML and DL stuff, helping a candidate during a job interview. 
 
 Question detected: "${question}"
 
@@ -147,7 +147,7 @@ export const initializeGeminiService = (apiKey: string): GeminiService => {
 
 export const getGeminiService = (): GeminiService => {
   if (!geminiService) {
-    throw new Error('Gemini service not initialized. Call initializeGeminiService first.');
+    throw new Error('Gemini service not initialized. Call initializeGeminiService first or check the API Usage limits');
   }
   return geminiService;
 };
