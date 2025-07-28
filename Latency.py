@@ -1,6 +1,6 @@
 import time
-from src.services.speechService import SpeechService
-from src.services.geminiService import initializeGeminiService, getGeminiService
+from src.services import SpeechService
+from src.services import initializeGeminiService, getGeminiService
 
 # Measure SpeechService latency
 def measure_speech_service_latency():
