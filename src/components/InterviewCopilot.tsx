@@ -170,6 +170,7 @@ export const InterviewCopilot: React.FC = () => {
               <TranscriptPanel
                 transcripts={transcripts}
                 interimTranscript={interimTranscript}
+                onAskGemini={generateDirectResponse}
               />
             </div>
 
