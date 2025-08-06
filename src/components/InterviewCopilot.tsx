@@ -4,9 +4,11 @@ import { MicrophoneButton } from './MicrophoneButton';
 import { TranscriptPanel } from './TranscriptPanel';
 import { AIResponsePanel } from './AIResponsePanel';
 import { ControlPanel } from './ControlPanel';
+import { DirectInputPanel } from './DirectInputPanel';
 import { StealthMode } from './StealthMode';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import heroImage from '@/assets/hero-bg.jpg';
 import { Sparkles, Shield, Zap } from 'lucide-react';
 
@@ -26,6 +28,7 @@ export const InterviewCopilot: React.FC = () => {
     updateGeminiApiKey,
     requestMicrophonePermission,
     generateAIResponse,
+    generateDirectResponse,
   } = useInterviewCopilot();
 
   if (isHidden) {
@@ -107,18 +110,35 @@ export const InterviewCopilot: React.FC = () => {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Left Column - Control Panel */}
             <div className="lg:col-span-1 space-y-6">
-              <ControlPanel
-                isListening={isListening}
-                isHidden={isHidden}
-                geminiApiKey={geminiApiKey}
-                microphonePermission={microphonePermission}
-                onToggleListening={toggleListening}
-                onToggleHidden={toggleHidden}
-                onUpdateGeminiApiKey={updateGeminiApiKey}
-                onClearTranscripts={clearTranscripts}
-                onRequestMicPermission={requestMicrophonePermission}
-                onGenerateTestResponse={generateAIResponse}
-              />
+              <Tabs defaultValue="controls" className="w-full">
+                <TabsList className="grid w-full grid-cols-2">
+                  <TabsTrigger value="controls">Controls</TabsTrigger>
+                  <TabsTrigger value="direct">Ask Gemini</TabsTrigger>
+                </TabsList>
+                
+                <TabsContent value="controls" className="space-y-4 mt-4">
+                  <ControlPanel
+                    isListening={isListening}
+                    isHidden={isHidden}
+                    geminiApiKey={geminiApiKey}
+                    microphonePermission={microphonePermission}
+                    onToggleListening={toggleListening}
+                    onToggleHidden={toggleHidden}
+                    onUpdateGeminiApiKey={updateGeminiApiKey}
+                    onClearTranscripts={clearTranscripts}
+                    onRequestMicPermission={requestMicrophonePermission}
+                    onGenerateTestResponse={generateAIResponse}
+                  />
+                </TabsContent>
+                
+                <TabsContent value="direct" className="mt-4">
+                  <DirectInputPanel
+                    onGenerateResponse={generateDirectResponse}
+                    isProcessing={isProcessing}
+                    geminiApiKey={geminiApiKey}
+                  />
+                </TabsContent>
+              </Tabs>
 
               {/* Quick Stats */}
               <Card className="glass-effect border-border/50">

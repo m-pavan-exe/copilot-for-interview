@@ -90,6 +90,7 @@ export const useInterviewCopilot = () => {
 
   const generateAIResponse = async (text: string) => {
     if (!geminiApiKey) {
+      console.log('No API key provided');
       toast({
         title: 'API Key Required',
         description: 'Please set your Gemini API key to enable AI responses',
@@ -99,17 +100,33 @@ export const useInterviewCopilot = () => {
     }
 
     try {
+      console.log('Generating AI response for:', text);
       setAppState(prev => ({ ...prev, isProcessing: true }));
       
-      const geminiService = getGeminiService();
+      // Initialize the service if not already done
+      if (!geminiApiKey) {
+        throw new Error('API key not available');
+      }
+      
+      let geminiService;
+      try {
+        geminiService = getGeminiService();
+      } catch (error) {
+        console.log('Service not initialized, initializing now...');
+        geminiService = initializeGeminiService(geminiApiKey);
+      }
       
       if (!geminiService.isQuestionDetected(text)) {
+        console.log('No question detected in:', text);
         setAppState(prev => ({ ...prev, isProcessing: false }));
         return;
       }
 
       const question = geminiService.extractQuestion(text);
+      console.log('Extracted question:', question);
+      
       const response = await geminiService.generateResponse(question);
+      console.log('Generated response:', response);
 
       const aiResponse: AIResponse = {
         id: Date.now().toString(),
@@ -134,7 +151,7 @@ export const useInterviewCopilot = () => {
       console.error('Failed to generate AI response:', error);
       toast({
         title: 'AI Response Failed',
-        description: 'Failed to generate response. Check your API key.',
+        description: `Failed to generate response: ${error instanceof Error ? error.message : 'Unknown error'}`,
         variant: 'destructive',
       });
       setAppState(prev => ({ ...prev, isProcessing: false }));
@@ -201,15 +218,18 @@ export const useInterviewCopilot = () => {
   };
 
   const updateGeminiApiKey = (apiKey: string) => {
+    console.log('Updating API key:', apiKey ? 'Key provided' : 'No key');
     setGeminiApiKey(apiKey);
     if (apiKey) {
       try {
         initializeGeminiService(apiKey);
+        console.log('Gemini service initialized successfully');
         toast({
           title: 'API Key Updated',
           description: 'Gemini AI service is now active',
         });
       } catch (error) {
+        console.error('Failed to initialize Gemini service:', error);
         toast({
           title: 'Invalid API Key',
           description: 'Please check your Gemini API key',
@@ -239,6 +259,11 @@ export const useInterviewCopilot = () => {
     return session;
   };
 
+  const generateDirectResponse = async (text: string) => {
+    console.log('Direct response generation for:', text);
+    await generateAIResponse(text);
+  };
+
   return {
     ...appState,
     interimTranscript,
@@ -250,5 +275,6 @@ export const useInterviewCopilot = () => {
     createNewSession,
     requestMicrophonePermission,
     generateAIResponse: (text: string) => generateAIResponse(text),
+    generateDirectResponse,
   };
 };
