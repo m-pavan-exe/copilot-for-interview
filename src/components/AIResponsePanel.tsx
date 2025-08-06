@@ -5,18 +5,20 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { AIResponse } from '@/types';
 import { formatDistanceToNow } from 'date-fns';
-import { Bot, Copy, Check, Sparkles } from 'lucide-react';
+import { Bot, Copy, Check, Sparkles, Maximize2 } from 'lucide-react';
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 
 interface AIResponsePanelProps {
   aiResponses: AIResponse[];
   isProcessing: boolean;
+  onMaximize?: () => void;
 }
 
 export const AIResponsePanel: React.FC<AIResponsePanelProps> = ({
   aiResponses,
   isProcessing,
+  onMaximize,
 }) => {
   const { toast } = useToast();
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -49,15 +51,27 @@ export const AIResponsePanel: React.FC<AIResponsePanelProps> = ({
   return (
     <Card className="glass-effect border-border/50">
       <CardHeader className="pb-3">
-        <CardTitle className="flex items-center gap-2 text-lg">
-          <Bot className="h-5 w-5 text-success" />
-          AI Responses
-          {aiResponses.length > 0 && (
-            <Badge variant="secondary" className="ml-auto">
-              {aiResponses.length}
-            </Badge>
+        <div className="flex items-center justify-between">
+          <CardTitle className="flex items-center gap-2 text-lg">
+            <Bot className="h-5 w-5 text-success" />
+            AI Responses
+            {aiResponses.length > 0 && (
+              <Badge variant="secondary" className="ml-2">
+                {aiResponses.length}
+              </Badge>
+            )}
+          </CardTitle>
+          {onMaximize && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onMaximize}
+              className="h-8 w-8 p-0"
+            >
+              <Maximize2 className="h-4 w-4" />
+            </Button>
           )}
-        </CardTitle>
+        </div>
       </CardHeader>
       <CardContent>
         <ScrollArea className="h-64" ref={scrollRef}>

@@ -82,10 +82,13 @@ export class SpeechService {
     };
 
     this.recognition.onend = () => {
-      this.isListening = false;
-      // Auto-restart if we were supposed to be listening
+      // Auto-restart for continuous listening unless manually stopped
       if (this.isListening) {
-        this.startListening();
+        setTimeout(() => {
+          if (this.isListening) {
+            this.startListening();
+          }
+        }, 500);
       }
     };
   }

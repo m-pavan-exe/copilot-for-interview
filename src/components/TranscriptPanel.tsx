@@ -20,8 +20,6 @@ export const TranscriptPanel: React.FC<TranscriptPanelProps> = ({
 }) => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [selectedText, setSelectedText] = useState('');
-  const [showFloatingButton, setShowFloatingButton] = useState(false);
-  const [buttonPosition, setButtonPosition] = useState({ x: 0, y: 0 });
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -34,19 +32,7 @@ export const TranscriptPanel: React.FC<TranscriptPanelProps> = ({
     if (selection && selection.toString().trim().length > 0) {
       const text = selection.toString().trim();
       setSelectedText(text);
-      
-      // Get the position of the selection to position the floating button
-      const range = selection.getRangeAt(0);
-      const rect = range.getBoundingClientRect();
-      
-      setButtonPosition({
-        x: rect.right + 10,
-        y: rect.top - 40
-      });
-      
-      setShowFloatingButton(true);
     } else {
-      setShowFloatingButton(false);
       setSelectedText('');
     }
   }, []);
@@ -56,36 +42,31 @@ export const TranscriptPanel: React.FC<TranscriptPanelProps> = ({
       const questionText = `Please explain or help me understand this: "${selectedText}"`;
       onAskGemini(questionText);
       
-      // Clear selection and hide button
+      // Clear selection
       window.getSelection()?.removeAllRanges();
-      setShowFloatingButton(false);
       setSelectedText('');
     }
   };
 
   const handleClearSelection = () => {
     window.getSelection()?.removeAllRanges();
-    setShowFloatingButton(false);
     setSelectedText('');
   };
 
-  // Hide floating button when clicking outside
+  // Clear selection when clicking outside
   useEffect(() => {
     const handleClickOutside = () => {
-      if (showFloatingButton) {
-        setTimeout(() => {
-          const selection = window.getSelection();
-          if (!selection || selection.toString().trim().length === 0) {
-            setShowFloatingButton(false);
-            setSelectedText('');
-          }
-        }, 100);
-      }
+      setTimeout(() => {
+        const selection = window.getSelection();
+        if (!selection || selection.toString().trim().length === 0) {
+          setSelectedText('');
+        }
+      }, 100);
     };
 
     document.addEventListener('mouseup', handleClickOutside);
     return () => document.removeEventListener('mouseup', handleClickOutside);
-  }, [showFloatingButton]);
+  }, []);
 
   return (
     <div className="relative">
@@ -153,39 +134,40 @@ export const TranscriptPanel: React.FC<TranscriptPanelProps> = ({
               )}
             </div>
           </ScrollArea>
+          
+          {/* Static Ask Gemini Button */}
+          {selectedText && onAskGemini && (
+            <div className="mt-3 p-3 bg-primary/10 border border-primary/30 rounded-lg">
+              <div className="flex items-center justify-between">
+                <div className="flex-1">
+                  <p className="text-xs text-muted-foreground mb-1">Selected text:</p>
+                  <p className="text-sm font-medium text-primary truncate">
+                    "{selectedText.substring(0, 50)}{selectedText.length > 50 ? '...' : ''}"
+                  </p>
+                </div>
+                <div className="flex items-center gap-2 ml-3">
+                  <Button
+                    size="sm"
+                    onClick={handleAskGemini}
+                    className="h-8 px-3"
+                  >
+                    <MessageSquare className="h-3 w-3 mr-1" />
+                    Ask Gemini
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={handleClearSelection}
+                    className="h-8 w-8 p-0"
+                  >
+                    <X className="h-3 w-3" />
+                  </Button>
+                </div>
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
-
-      {/* Floating Action Button for Selected Text */}
-      {showFloatingButton && onAskGemini && (
-        <div
-          className="fixed z-50 flex items-center gap-2 bg-primary text-primary-foreground px-3 py-2 rounded-lg shadow-lg border animate-in slide-in-from-top-2"
-          style={{
-            left: Math.min(buttonPosition.x, window.innerWidth - 300),
-            top: Math.max(buttonPosition.y, 10),
-          }}
-        >
-          <div className="flex items-center gap-2">
-            <Button
-              size="sm"
-              variant="secondary"
-              onClick={handleAskGemini}
-              className="h-8 px-3 bg-white/20 hover:bg-white/30 text-white border-white/30"
-            >
-              <MessageSquare className="h-3 w-3 mr-1" />
-              Ask Gemini
-            </Button>
-            <Button
-              size="sm"
-              variant="ghost"
-              onClick={handleClearSelection}
-              className="h-8 w-8 p-0 text-white hover:bg-white/20"
-            >
-              <X className="h-3 w-3" />
-            </Button>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

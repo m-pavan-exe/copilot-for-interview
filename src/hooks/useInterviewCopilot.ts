@@ -274,7 +274,7 @@ export const useInterviewCopilot = () => {
     updateGeminiApiKey,
     createNewSession,
     requestMicrophonePermission,
-    generateAIResponse: (text: string) => generateAIResponse(text),
+    generateAIResponse,
     generateDirectResponse,
   };
 };
