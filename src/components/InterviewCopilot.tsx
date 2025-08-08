@@ -20,11 +20,17 @@ export const InterviewCopilot: React.FC = () => {
     aiResponses,
     interimTranscript,
     geminiApiKey,
+    chatgptApiKey,
+    selectedProvider,
+    personalContext,
     microphonePermission,
     toggleListening,
     toggleHidden,
     clearTranscripts,
     updateGeminiApiKey,
+    updateChatGPTApiKey,
+    updateAIProvider,
+    updatePersonalContext,
     requestMicrophonePermission,
     generateAIResponse,
     generateDirectResponse,
@@ -54,12 +60,18 @@ export const InterviewCopilot: React.FC = () => {
           isHidden={isHidden}
           isProcessing={isProcessing}
           geminiApiKey={geminiApiKey}
+          chatgptApiKey={chatgptApiKey}
+          selectedProvider={selectedProvider}
+          personalContext={personalContext}
           microphonePermission={microphonePermission}
           transcriptCount={transcripts.length}
           aiResponseCount={aiResponses.length}
           onToggleListening={toggleListening}
           onToggleHidden={toggleHidden}
           onUpdateGeminiApiKey={updateGeminiApiKey}
+          onUpdateChatGPTApiKey={updateChatGPTApiKey}
+          onUpdateAIProvider={updateAIProvider}
+          onUpdatePersonalContext={updatePersonalContext}
           onClearTranscripts={clearTranscripts}
           onRequestMicPermission={requestMicrophonePermission}
           onGenerateTestResponse={generateAIResponse}

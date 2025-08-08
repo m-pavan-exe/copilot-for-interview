@@ -1,6 +1,8 @@
 import React from 'react';
 import { ControlPanel } from './ControlPanel';
 import { DirectInputPanel } from './DirectInputPanel';
+import { AIProviderSettings, AIProvider } from './AIProviderSettings';
+import { PersonalContextPanel, PersonalContext } from './PersonalContextPanel';
 import {
   Sidebar,
   SidebarContent,
@@ -13,19 +15,25 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Settings, Bot } from 'lucide-react';
+import { Settings, Bot, User } from 'lucide-react';
 
 interface AppSidebarProps {
   isListening: boolean;
   isHidden: boolean;
   isProcessing: boolean;
   geminiApiKey: string;
+  chatgptApiKey: string;
+  selectedProvider: AIProvider;
+  personalContext: PersonalContext;
   microphonePermission: 'granted' | 'denied' | 'prompt';
   transcriptCount: number;
   aiResponseCount: number;
   onToggleListening: () => void;
   onToggleHidden: () => void;
   onUpdateGeminiApiKey: (apiKey: string) => void;
+  onUpdateChatGPTApiKey: (apiKey: string) => void;
+  onUpdateAIProvider: (provider: AIProvider) => void;
+  onUpdatePersonalContext: (context: PersonalContext) => void;
   onClearTranscripts: () => void;
   onRequestMicPermission: () => void;
   onGenerateTestResponse: (text: string) => void;
@@ -37,12 +45,18 @@ export function AppSidebar({
   isHidden,
   isProcessing,
   geminiApiKey,
+  chatgptApiKey,
+  selectedProvider,
+  personalContext,
   microphonePermission,
   transcriptCount,
   aiResponseCount,
   onToggleListening,
   onToggleHidden,
   onUpdateGeminiApiKey,
+  onUpdateChatGPTApiKey,
+  onUpdateAIProvider,
+  onUpdatePersonalContext,
   onClearTranscripts,
   onRequestMicPermission,
   onGenerateTestResponse,
@@ -68,9 +82,11 @@ export function AppSidebar({
             {!collapsed && (
               <div className="space-y-4">
                 <Tabs defaultValue="controls" className="w-full">
-                  <TabsList className="grid w-full grid-cols-2">
+                  <TabsList className="grid w-full grid-cols-4 text-xs">
                     <TabsTrigger value="controls">Controls</TabsTrigger>
-                    <TabsTrigger value="direct">Ask Gemini</TabsTrigger>
+                    <TabsTrigger value="ai">AI Setup</TabsTrigger>
+                    <TabsTrigger value="context">Context</TabsTrigger>
+                    <TabsTrigger value="direct">Ask AI</TabsTrigger>
                   </TabsList>
                   
                   <TabsContent value="controls" className="space-y-4 mt-4">
@@ -87,12 +103,30 @@ export function AppSidebar({
                       onGenerateTestResponse={onGenerateTestResponse}
                     />
                   </TabsContent>
+
+                  <TabsContent value="ai" className="mt-4">
+                    <AIProviderSettings
+                      selectedProvider={selectedProvider}
+                      geminiApiKey={geminiApiKey}
+                      chatgptApiKey={chatgptApiKey}
+                      onProviderChange={onUpdateAIProvider}
+                      onGeminiApiKeyChange={onUpdateGeminiApiKey}
+                      onChatGPTApiKeyChange={onUpdateChatGPTApiKey}
+                    />
+                  </TabsContent>
+
+                  <TabsContent value="context" className="mt-4">
+                    <PersonalContextPanel
+                      context={personalContext}
+                      onContextChange={onUpdatePersonalContext}
+                    />
+                  </TabsContent>
                   
                   <TabsContent value="direct" className="mt-4">
                     <DirectInputPanel
                       onGenerateResponse={onGenerateDirectResponse}
                       isProcessing={isProcessing}
-                      geminiApiKey={geminiApiKey}
+                      geminiApiKey={selectedProvider === 'gemini' ? geminiApiKey : chatgptApiKey}
                     />
                   </TabsContent>
                 </Tabs>

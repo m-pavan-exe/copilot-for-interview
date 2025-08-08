@@ -25,7 +25,7 @@ export const DirectInputPanel: React.FC<DirectInputPanelProps> = ({
     if (!inputText.trim()) {
       toast({
         title: 'Enter a question',
-        description: 'Please enter a question to ask Gemini',
+        description: 'Please enter a question to ask the AI',
         variant: 'destructive',
       });
       return;
@@ -34,7 +34,7 @@ export const DirectInputPanel: React.FC<DirectInputPanelProps> = ({
     if (!geminiApiKey) {
       toast({
         title: 'API Key Required',
-        description: 'Please set your Gemini API key in Advanced Settings',
+        description: 'Please set your AI provider API key in AI Setup tab',
         variant: 'destructive',
       });
       return;
@@ -72,7 +72,7 @@ export const DirectInputPanel: React.FC<DirectInputPanelProps> = ({
         <CardTitle className="flex items-center justify-between text-lg">
           <div className="flex items-center gap-2">
             <MessageSquare className="h-5 w-5 text-primary" />
-            Ask Gemini Directly
+            Ask AI Directly
           </div>
           {geminiApiKey ? (
             <Badge variant="default" className="text-xs">
@@ -109,7 +109,7 @@ export const DirectInputPanel: React.FC<DirectInputPanelProps> = ({
             ) : (
               <>
                 <Send className="h-4 w-4 mr-2" />
-                Ask Gemini
+                Ask AI
               </>
             )}
           </Button>

@@ -31,6 +31,17 @@ export interface SpeechRecognitionConfig {
   lang: string;
 }
 
+export interface PersonalContext {
+  name: string;
+  role: string;
+  experience: string;
+  education: string;
+  skills: string;
+  resume: string;
+}
+
+export type AIProvider = 'gemini' | 'chatgpt';
+
 export interface AppState {
   isListening: boolean;
   isHidden: boolean;
@@ -39,4 +50,6 @@ export interface AppState {
   aiResponses: AIResponse[];
   microphonePermission: 'granted' | 'denied' | 'prompt';
   isProcessing: boolean;
+  selectedProvider: AIProvider;
+  personalContext: PersonalContext;
 }

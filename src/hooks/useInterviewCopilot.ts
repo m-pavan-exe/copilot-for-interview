@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { speechService } from '@/services/speechService';
 import { getGeminiService, initializeGeminiService } from '@/services/geminiService';
-import { TranscriptEntry, AIResponse, InterviewSession, AppState } from '@/types';
+import { getChatGPTService, initializeChatGPTService } from '@/services/chatgptService';
+import { TranscriptEntry, AIResponse, InterviewSession, AppState, AIProvider, PersonalContext } from '@/types';
 import { useToast } from '@/hooks/use-toast';
 
 export const useInterviewCopilot = () => {
@@ -14,10 +15,20 @@ export const useInterviewCopilot = () => {
     aiResponses: [],
     microphonePermission: 'prompt',
     isProcessing: false,
+    selectedProvider: 'gemini',
+    personalContext: {
+      name: '',
+      role: '',
+      experience: '',
+      education: '',
+      skills: '',
+      resume: '',
+    },
   });
 
   const [interimTranscript, setInterimTranscript] = useState('');
   const [geminiApiKey, setGeminiApiKey] = useState('');
+  const [chatgptApiKey, setChatgptApiKey] = useState('');
   const debounceTimerRef = useRef<NodeJS.Timeout>();
   const lastProcessedTextRef = useRef('');
 
@@ -76,7 +87,8 @@ export const useInterviewCopilot = () => {
     }));
 
     // Check if this looks like a question and generate AI response
-    if (geminiApiKey) {
+    const currentApiKey = appState.selectedProvider === 'gemini' ? geminiApiKey : chatgptApiKey;
+    if (currentApiKey) {
       // Debounce AI response generation
       if (debounceTimerRef.current) {
         clearTimeout(debounceTimerRef.current);
@@ -84,16 +96,19 @@ export const useInterviewCopilot = () => {
 
       debounceTimerRef.current = setTimeout(() => {
         generateAIResponse(text);
-      }, 1000);
+      }, 500); // Reduced debounce time for faster response
     }
-  }, [geminiApiKey]);
+  }, [geminiApiKey, chatgptApiKey, appState.selectedProvider]);
 
   const generateAIResponse = async (text: string) => {
-    if (!geminiApiKey) {
+    const currentApiKey = appState.selectedProvider === 'gemini' ? geminiApiKey : chatgptApiKey;
+    const providerName = appState.selectedProvider === 'gemini' ? 'Gemini' : 'ChatGPT';
+    
+    if (!currentApiKey) {
       console.log('No API key provided');
       toast({
         title: 'API Key Required',
-        description: 'Please set your Gemini API key to enable AI responses',
+        description: `Please set your ${providerName} API key to enable AI responses`,
         variant: 'destructive',
       });
       return;
@@ -103,29 +118,52 @@ export const useInterviewCopilot = () => {
       console.log('Generating AI response for:', text);
       setAppState(prev => ({ ...prev, isProcessing: true }));
       
-      // Initialize the service if not already done
-      if (!geminiApiKey) {
-        throw new Error('API key not available');
+      let service;
+      let isQuestionDetected = false;
+      let question = '';
+      
+      // Initialize and use the appropriate service
+      if (appState.selectedProvider === 'gemini') {
+        try {
+          service = getGeminiService();
+        } catch (error) {
+          console.log('Gemini service not initialized, initializing now...');
+          service = initializeGeminiService(geminiApiKey);
+        }
+        isQuestionDetected = service.isQuestionDetected(text);
+        question = service.extractQuestion(text);
+      } else {
+        try {
+          service = getChatGPTService();
+        } catch (error) {
+          console.log('ChatGPT service not initialized, initializing now...');
+          service = initializeChatGPTService(chatgptApiKey);
+        }
+        isQuestionDetected = service.isQuestionDetected(text);
+        question = service.extractQuestion(text);
       }
       
-      let geminiService;
-      try {
-        geminiService = getGeminiService();
-      } catch (error) {
-        console.log('Service not initialized, initializing now...');
-        geminiService = initializeGeminiService(geminiApiKey);
-      }
-      
-      if (!geminiService.isQuestionDetected(text)) {
+      if (!isQuestionDetected) {
         console.log('No question detected in:', text);
         setAppState(prev => ({ ...prev, isProcessing: false }));
         return;
       }
 
-      const question = geminiService.extractQuestion(text);
       console.log('Extracted question:', question);
       
-      const response = await geminiService.generateResponse(question);
+      // Create context string from personal context
+      const contextParts = [];
+      const { personalContext } = appState;
+      if (personalContext.name) contextParts.push(`Name: ${personalContext.name}`);
+      if (personalContext.role) contextParts.push(`Role: ${personalContext.role}`);
+      if (personalContext.experience) contextParts.push(`Experience: ${personalContext.experience}`);
+      if (personalContext.education) contextParts.push(`Education: ${personalContext.education}`);
+      if (personalContext.skills) contextParts.push(`Skills: ${personalContext.skills}`);
+      if (personalContext.resume) contextParts.push(`Resume: ${personalContext.resume}`);
+      
+      const contextString = contextParts.length > 0 ? contextParts.join('\n') : undefined;
+      
+      const response = await service.generateResponse(question, contextString);
       console.log('Generated response:', response);
 
       const aiResponse: AIResponse = {
@@ -144,14 +182,14 @@ export const useInterviewCopilot = () => {
 
       toast({
         title: 'AI Response Generated',
-        description: 'New response available in the panel',
+        description: `New response from ${providerName}`,
       });
 
     } catch (error) {
       console.error('Failed to generate AI response:', error);
       toast({
         title: 'AI Response Failed',
-        description: `Failed to generate response: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        description: `Failed to generate response from ${providerName}: ${error instanceof Error ? error.message : 'Unknown error'}`,
         variant: 'destructive',
       });
       setAppState(prev => ({ ...prev, isProcessing: false }));
@@ -259,6 +297,44 @@ export const useInterviewCopilot = () => {
     return session;
   };
 
+  const updateChatGPTApiKey = (apiKey: string) => {
+    console.log('Updating ChatGPT API key:', apiKey ? 'Key provided' : 'No key');
+    setChatgptApiKey(apiKey);
+    if (apiKey) {
+      try {
+        initializeChatGPTService(apiKey);
+        console.log('ChatGPT service initialized successfully');
+        toast({
+          title: 'API Key Updated',
+          description: 'ChatGPT AI service is now active',
+        });
+      } catch (error) {
+        console.error('Failed to initialize ChatGPT service:', error);
+        toast({
+          title: 'Invalid API Key',
+          description: 'Please check your ChatGPT API key',
+          variant: 'destructive',
+        });
+      }
+    }
+  };
+
+  const updateAIProvider = (provider: AIProvider) => {
+    setAppState(prev => ({ ...prev, selectedProvider: provider }));
+    toast({
+      title: 'AI Provider Changed',
+      description: `Switched to ${provider === 'gemini' ? 'Google Gemini' : 'OpenAI ChatGPT'}`,
+    });
+  };
+
+  const updatePersonalContext = (context: PersonalContext) => {
+    setAppState(prev => ({ ...prev, personalContext: context }));
+    toast({
+      title: 'Context Updated',
+      description: 'Personal context saved for personalized responses',
+    });
+  };
+
   const generateDirectResponse = async (text: string) => {
     console.log('Direct response generation for:', text);
     await generateAIResponse(text);
@@ -268,10 +344,14 @@ export const useInterviewCopilot = () => {
     ...appState,
     interimTranscript,
     geminiApiKey,
+    chatgptApiKey,
     toggleListening,
     toggleHidden,
     clearTranscripts,
     updateGeminiApiKey,
+    updateChatGPTApiKey,
+    updateAIProvider,
+    updatePersonalContext,
     createNewSession,
     requestMicrophonePermission,
     generateAIResponse,
