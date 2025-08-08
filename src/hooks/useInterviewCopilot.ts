@@ -256,24 +256,39 @@ export const useInterviewCopilot = () => {
   };
 
   const updateGeminiApiKey = (apiKey: string) => {
-    console.log('Updating API key:', apiKey ? 'Key provided' : 'No key');
+    console.log('=== Gemini Service Update Debug ===');
+    console.log('Received key length:', apiKey.length);
+    console.log('Current geminiApiKey state:', geminiApiKey.length);
+    
     setGeminiApiKey(apiKey);
+    
     if (apiKey) {
       try {
-        initializeGeminiService(apiKey);
-        console.log('Gemini service initialized successfully');
+        const service = initializeGeminiService(apiKey);
+        console.log('Gemini service initialized successfully:', !!service);
+        
+        // Verify service is accessible
+        const testService = getGeminiService();
+        console.log('Service verification successful:', !!testService);
+        
         toast({
           title: 'API Key Updated',
           description: 'Gemini AI service is now active',
         });
       } catch (error) {
-        console.error('Failed to initialize Gemini service:', error);
+        console.error('=== Gemini Service Initialization Failed ===');
+        console.error('Error details:', error);
+        console.error('API key length:', apiKey.length);
+        console.error('API key format check:', /^[A-Za-z0-9_-]+$/.test(apiKey));
+        
         toast({
           title: 'Invalid API Key',
-          description: 'Please check your Gemini API key',
+          description: `Please check your Gemini API key: ${error.message}`,
           variant: 'destructive',
         });
       }
+    } else {
+      console.log('Empty API key provided, skipping initialization');
     }
   };
 
@@ -298,24 +313,39 @@ export const useInterviewCopilot = () => {
   };
 
   const updateChatGPTApiKey = (apiKey: string) => {
-    console.log('Updating ChatGPT API key:', apiKey ? 'Key provided' : 'No key');
+    console.log('=== ChatGPT Service Update Debug ===');
+    console.log('Received key length:', apiKey.length);
+    console.log('Current chatgptApiKey state:', chatgptApiKey.length);
+    
     setChatgptApiKey(apiKey);
+    
     if (apiKey) {
       try {
-        initializeChatGPTService(apiKey);
-        console.log('ChatGPT service initialized successfully');
+        const service = initializeChatGPTService(apiKey);
+        console.log('ChatGPT service initialized successfully:', !!service);
+        
+        // Verify service is accessible
+        const testService = getChatGPTService();
+        console.log('Service verification successful:', !!testService);
+        
         toast({
           title: 'API Key Updated',
           description: 'ChatGPT AI service is now active',
         });
       } catch (error) {
-        console.error('Failed to initialize ChatGPT service:', error);
+        console.error('=== ChatGPT Service Initialization Failed ===');
+        console.error('Error details:', error);
+        console.error('API key length:', apiKey.length);
+        console.error('API key format check:', /^sk-[A-Za-z0-9_-]+$/.test(apiKey));
+        
         toast({
           title: 'Invalid API Key',
-          description: 'Please check your ChatGPT API key',
+          description: `Please check your ChatGPT API key: ${error.message}`,
           variant: 'destructive',
         });
       }
+    } else {
+      console.log('Empty API key provided, skipping initialization');
     }
   };
 

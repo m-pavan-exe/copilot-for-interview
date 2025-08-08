@@ -127,7 +127,24 @@ Response:`;
 let chatgptService: ChatGPTService | null = null;
 
 export const initializeChatGPTService = (apiKey: string): ChatGPTService => {
+  console.log('=== Initializing ChatGPT Service ===');
+  console.log('API key provided:', !!apiKey);
+  console.log('API key length:', apiKey?.length || 0);
+  
+  if (!apiKey || apiKey.trim().length === 0) {
+    throw new Error('API key is required and cannot be empty');
+  }
+  
+  if (!apiKey.startsWith('sk-')) {
+    throw new Error('ChatGPT API key must start with "sk-"');
+  }
+  
+  if (apiKey.length < 20) {
+    throw new Error('API key appears to be too short');
+  }
+  
   chatgptService = new ChatGPTService(apiKey);
+  console.log('ChatGPT service instance created successfully');
   return chatgptService;
 };
 

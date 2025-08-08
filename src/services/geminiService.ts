@@ -141,7 +141,20 @@ Response:`;
 let geminiService: GeminiService | null = null;
 
 export const initializeGeminiService = (apiKey: string): GeminiService => {
+  console.log('=== Initializing Gemini Service ===');
+  console.log('API key provided:', !!apiKey);
+  console.log('API key length:', apiKey?.length || 0);
+  
+  if (!apiKey || apiKey.trim().length === 0) {
+    throw new Error('API key is required and cannot be empty');
+  }
+  
+  if (apiKey.length < 10) {
+    throw new Error('API key appears to be too short');
+  }
+  
   geminiService = new GeminiService(apiKey);
+  console.log('Gemini service instance created successfully');
   return geminiService;
 };
 

@@ -39,17 +39,25 @@ export function AIProviderSettings({
   }, [chatgptApiKey]);
 
   const handleGeminiKeySubmit = () => {
-    console.log('Submitting Gemini API key:', localGeminiKey ? 'Key provided' : 'No key');
+    console.log('=== Gemini API Key Save Debug ===');
+    console.log('Local key length:', localGeminiKey.length);
+    console.log('Key starts with:', localGeminiKey.substring(0, 10) + '...');
     onGeminiApiKeyChange(localGeminiKey);
+    console.log('Save callback completed');
   };
 
   const handleChatGPTKeySubmit = () => {
-    console.log('Submitting ChatGPT API key:', localChatGPTKey ? 'Key provided' : 'No key');
+    console.log('=== ChatGPT API Key Save Debug ===');
+    console.log('Local key length:', localChatGPTKey.length);
+    console.log('Key starts with:', localChatGPTKey.substring(0, 10) + '...');
     onChatGPTApiKeyChange(localChatGPTKey);
+    console.log('Save callback completed');
   };
 
   const getCurrentApiKey = () => {
-    return selectedProvider === 'gemini' ? geminiApiKey : chatgptApiKey;
+    const currentKey = selectedProvider === 'gemini' ? geminiApiKey : chatgptApiKey;
+    console.log('Status check - Provider:', selectedProvider, 'Has key:', !!currentKey, 'Key length:', currentKey?.length || 0);
+    return currentKey;
   };
 
   return (
