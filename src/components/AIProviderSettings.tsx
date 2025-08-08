@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
@@ -29,11 +29,22 @@ export function AIProviderSettings({
   const [localGeminiKey, setLocalGeminiKey] = useState(geminiApiKey);
   const [localChatGPTKey, setLocalChatGPTKey] = useState(chatgptApiKey);
 
+  // Sync local state with props when they change
+  useEffect(() => {
+    setLocalGeminiKey(geminiApiKey);
+  }, [geminiApiKey]);
+
+  useEffect(() => {
+    setLocalChatGPTKey(chatgptApiKey);
+  }, [chatgptApiKey]);
+
   const handleGeminiKeySubmit = () => {
+    console.log('Submitting Gemini API key:', localGeminiKey ? 'Key provided' : 'No key');
     onGeminiApiKeyChange(localGeminiKey);
   };
 
   const handleChatGPTKeySubmit = () => {
+    console.log('Submitting ChatGPT API key:', localChatGPTKey ? 'Key provided' : 'No key');
     onChatGPTApiKeyChange(localChatGPTKey);
   };
 
